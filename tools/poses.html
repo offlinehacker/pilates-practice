@@ -1,0 +1,45 @@
+<!doctype html>
+<!-- Dev gallery for authoring poses: tools/poses.html?app=Reformer  (&id=<exercise-id> for one big pose) -->
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Pose gallery</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 12px; background: #fff7fb; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  .card { background: #fff; border-radius: 10px; padding: 6px; border: 2px solid #eee; }
+  .card.missing { border-color: #ffb3b3; background: #fff0f0; }
+  .card h4 { margin: 2px 0; font-size: 12px; }
+  .card small { color: #888; font-size: 10px; display: block; }
+  svg { width: 100%; height: auto; display: block; }
+  .big svg { max-width: 900px; }
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script src="../data.js"></script>
+<script src="../poses.js"></script>
+<script src="../poses/mat.js"></script>
+<script src="../poses/reformer.js"></script>
+<script src="../poses/cadillac.js"></script>
+<script src="../poses/chair.js"></script>
+<script src="../poses/other.js"></script>
+<script>
+  const q = new URLSearchParams(location.search);
+  const app = q.get("app");
+  const id = q.get("id");
+  const core = q.get("all") ? () => true : (e) => ["Fundamental", "Intermediate"].includes(e.level);
+  let list = PP_DATA.exercises.filter((e) => (!app || e.apparatus === app) && core(e));
+  if (id) list = PP_DATA.exercises.filter((e) => id.split(",").includes(e.id));
+  const done = list.filter((e) => PP_FIG.hasPose(e.id)).length;
+  document.getElementById("out").innerHTML =
+    `<p><b>${app || "all"}</b>: ${done}/${list.length} posed</p><div class="grid ${id ? "big" : ""}">` +
+    list
+      .map(
+        (e) => `<div class="card ${PP_FIG.hasPose(e.id) ? "" : "missing"}">${PP_FIG.svg(e)}<h4>${e.label}</h4><small>${e.id} · ${e.block} · ${e.level}</small><small>${e.setup || ""}</small></div>`
+      )
+      .join("") +
+    "</div>";
+</script>
+</body>
+</html>
